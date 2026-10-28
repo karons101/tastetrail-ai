@@ -67,13 +67,25 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Movie recommendations based on a known taste signal.
+// Movie recommendations based on a supplied taste signal.
+// Defaults to Interstellar when entityId is not provided.
 app.get('/api/qloo-test', async (req, res) => {
+  const defaultEntityId = '057DA9D9-399B-437E-8BCA-A80E499125EF';
+  const entityId = req.query.entityId ?? defaultEntityId;
+
+  if (
+    typeof entityId !== 'string' ||
+    !entityId.trim()
+  ) {
+    return res.status(400).json({
+      error: 'entityId must be a non-empty string.',
+    });
+  }
+
   try {
     const data = await qlooRequest('/v2/insights', {
       'filter.type': 'urn:entity:movie',
-      'signal.interests.entities':
-        '057DA9D9-399B-437E-8BCA-A80E499125EF',
+      'signal.interests.entities': entityId.trim(),
       take: '5',
       'feature.explainability': 'true',
     });
@@ -93,6 +105,7 @@ app.get('/api/qloo-test', async (req, res) => {
     return res.json({
       status: 'ok',
       message: 'Qloo Insights request succeeded.',
+      signalEntityId: entityId.trim(),
       count: recommendations.length,
       recommendations,
       explainability: data?.query?.explainability ?? null,
@@ -134,7 +147,6 @@ app.get('/api/qloo-search', async (req, res) => {
       query: query.trim(),
     };
 
-    // Forward types only when the caller supplies it.
     if (typeof types === 'string' && types.trim()) {
       params.types = types.trim();
     }
