@@ -25,7 +25,6 @@ const recommendationsTitle = document.getElementById(
     "recommendationsTitle"
 );
 
-
 let activeRequestToken = 0;
 
 /**
@@ -396,7 +395,11 @@ async function findMoviePoster(title) {
 }
 
 /**
- * Display the search results returned by Qloo.
+ * Render only valid movie search results.
+ *
+ * Filters out entries without a usable title or entity ID,
+ * removes duplicate entities, and ensures every visible card
+ * has a working click handler.
  */
 function renderSearchResults(entities) {
     if (!searchResults) {
@@ -405,25 +408,43 @@ function renderSearchResults(entities) {
 
     searchResults.replaceChildren();
 
+    if (!Array.isArray(entities) || entities.length === 0) {
+        showStatus(searchResults, "No movies found. Try another title.");
+        return;
+    }
+
     const uniqueEntities = [];
     const seenIds = new Set();
 
     for (const entity of entities) {
         const id = getEntityId(entity);
-        const name = getMovieName(entity);
+        const name = getMovieName(entity).trim();
 
-        if (!name || name === "Untitled movie") {
+        // Skip incomplete results that cannot be explored.
+        if (!id || !name || name === "Untitled movie") {
             continue;
         }
 
-        if (id && seenIds.has(id)) {
+        // If Qloo supplies entity types, keep movie entities only.
+        const entityTypes = Array.isArray(entity.types)
+            ? entity.types
+            : entity.type
+                ? [entity.type]
+                : [];
+
+        if (
+            entityTypes.length > 0 &&
+            !entityTypes.includes("urn:entity:movie")
+        ) {
             continue;
         }
 
-        if (id) {
-            seenIds.add(id);
+        // Remove duplicate entities.
+        if (seenIds.has(id)) {
+            continue;
         }
 
+        seenIds.add(id);
         uniqueEntities.push(entity);
 
         if (uniqueEntities.length >= 10) {
@@ -431,8 +452,11 @@ function renderSearchResults(entities) {
         }
     }
 
-    if (!uniqueEntities.length) {
-        showStatus(searchResults, "No movies found. Try another title.");
+    if (uniqueEntities.length === 0) {
+        showStatus(
+            searchResults,
+            "No usable movie results were found. Try a different search."
+        );
         return;
     }
 
@@ -440,10 +464,14 @@ function renderSearchResults(entities) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "movie-result";
+        button.setAttribute(
+            "aria-label",
+            `Explore ${getMovieName(movie)}`
+        );
 
-        const posterUrl = getMoviePoster(movie);
         const title = getMovieName(movie);
         const year = getMovieYear(movie);
+        const posterUrl = getMoviePoster(movie);
 
         if (posterUrl) {
             const poster = document.createElement("img");
@@ -512,11 +540,30 @@ async function loadRecommendations(movie) {
             `/api/qloo-test?entityId=${encodeURIComponent(entityId)}`
         );
 
-        if (!response.ok) {
-            throw new Error("Could not load recommendations. Please try again.");
-        }
+        /*
+         * Read the response body before checking the HTTP status.
+         * This allows the frontend to distinguish an unsupported Qloo
+         * recommendation signal from other API errors.
+         */
+        const data = await response.json().catch(() => ({}));
 
-        const data = await response.json();
+        if (!response.ok) {
+            /*
+             * The backend reports Qloo's original HTTP status through
+             * upstreamStatus. Qloo can return search entities that it
+             * does not accept as recommendation signals.
+             */
+            if (data.upstreamStatus === 400) {
+                throw new Error(
+                    "Qloo cannot generate recommendations from this movie entry. " +
+                    "Try the original film or choose another movie."
+                );
+            }
+
+            throw new Error(
+                data.error || "Could not load recommendations. Please try again."
+            );
+        }
 
         if (requestToken !== activeRequestToken) {
             return;
