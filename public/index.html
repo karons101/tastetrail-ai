@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10111b">
+  <meta
+    name="description"
+    content="Discover your next favorite movie with TasteTrail AI."
+  >
+  <title>TasteTrail AI — Discover Your Next Favorite</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <a href="/" aria-label="TasteTrail AI home">
+      <span aria-hidden="true">✦</span> TasteTrail AI
+    </a>
+  </header>
+
+  <main>
+    <section aria-labelledby="hero-title">
+      <p>YOUR TASTE. YOUR NEXT OBSESSION.</p>
+
+      <h1 id="hero-title">
+        Discover stories<br>
+        that <em>get you.</em>
+      </h1>
+
+      <p>
+        Tell us a movie you love. We'll help you discover
+        what to watch next.
+      </p>
+
+      <form id="movie-search-form">
+        <label for="movie-query">Search for a movie</label>
+
+        <div>
+          <input
+            id="movie-query"
+            name="query"
+            type="search"
+            placeholder="Try Interstellar, The Matrix..."
+            autocomplete="off"
+            required
+          >
+
+          <button type="submit">Find movies</button>
+        </div>
+      </form>
+
+      <p id="search-status" role="status" aria-live="polite"></p>
+      <div id="search-results" aria-label="Movie search results"></div>
+    </section>
+
+    <section aria-labelledby="recommendations-title">
+      <h2 id="recommendations-title">Your next favorites</h2>
+      <p>Select a movie from your search results to discover similar titles.</p>
+
+      <div id="recommendations" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made for curious minds and great movie nights.</p>
+  </footer>
+  <script src="/app.js" defer></script>
+</body>
+</html>

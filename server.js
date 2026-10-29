@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,8 +10,11 @@ const QLOO_BASE_URL = 'https://hackathon.api.qloo.com';
 
 app.use(express.json());
 
+// Serve the frontend files from the public directory.
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Shared helper for requests to Qloo.
-async function qlooRequest(path, params = {}) {
+async function qlooRequest(pathname, params = {}) {
   const apiKey = process.env.QLOO_API_KEY;
 
   if (!apiKey) {
@@ -19,7 +23,7 @@ async function qlooRequest(path, params = {}) {
     throw error;
   }
 
-  const url = new URL(path, QLOO_BASE_URL);
+  const url = new URL(pathname, QLOO_BASE_URL);
 
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {
@@ -73,10 +77,7 @@ app.get('/api/qloo-test', async (req, res) => {
   const defaultEntityId = '057DA9D9-399B-437E-8BCA-A80E499125EF';
   const entityId = req.query.entityId ?? defaultEntityId;
 
-  if (
-    typeof entityId !== 'string' ||
-    !entityId.trim()
-  ) {
+  if (typeof entityId !== 'string' || !entityId.trim()) {
     return res.status(400).json({
       error: 'entityId must be a non-empty string.',
     });
@@ -133,10 +134,7 @@ app.get('/api/qloo-search', async (req, res) => {
     });
   }
 
-  if (
-    types !== undefined &&
-    (typeof types !== 'string' || !types.trim())
-  ) {
+  if (types !== undefined && (typeof types !== 'string' || !types.trim())) {
     return res.status(400).json({
       error: 'The types parameter must be a non-empty string.',
     });
