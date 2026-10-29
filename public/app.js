@@ -28,13 +28,70 @@ const recommendationsTitle = document.getElementById(
 let activeRequestToken = 0;
 
 // Discovery Journey: records movies explored during the current session.
-const discoveryJourney = [];
+
+const JOURNEY_STORAGE_KEY = "tastetrail-discovery-journey";
+
+/**
+ * Restore the saved discovery journey from localStorage.
+ * Invalid entries and duplicate movie IDs are ignored.
+ */
+function restoreDiscoveryJourney() {
+    try {
+        const savedJourney = localStorage.getItem(JOURNEY_STORAGE_KEY);
+
+        if (!savedJourney) {
+            return [];
+        }
+
+        const parsedJourney = JSON.parse(savedJourney);
+
+        if (!Array.isArray(parsedJourney)) {
+            return [];
+        }
+
+        const uniqueMovies = [];
+        const seenIds = new Set();
+
+        for (const movie of parsedJourney) {
+            if (
+                !movie ||
+                typeof movie.id !== "string" ||
+                typeof movie.name !== "string" ||
+                !movie.id.trim() ||
+                !movie.name.trim() ||
+                seenIds.has(movie.id)
+            ) {
+                continue;
+            }
+
+            seenIds.add(movie.id);
+
+            uniqueMovies.push({
+                id: movie.id,
+                name: movie.name
+            });
+        }
+
+        return uniqueMovies;
+    } catch (error) {
+        console.warn(
+            "Could not restore the discovery journey.",
+            error
+        );
+
+        return [];
+    }
+}
+
+const discoveryJourney = restoreDiscoveryJourney();
+
 const journeySection = document.getElementById("discovery-journey");
 const journeyTrail = document.getElementById("journey-trail");
 const clearJourneyButton = document.getElementById("clear-journey");
 
 /**
- * Render the user's movie exploration history in chronological order.
+ * Render the journey and save its current state.
+ * Saving here ensures additions and clearing are persisted.
  */
 function renderDiscoveryJourney() {
     if (!journeySection || !journeyTrail) {
@@ -57,6 +114,7 @@ function renderDiscoveryJourney() {
             arrow.className = "journey-arrow";
             arrow.textContent = "→";
             arrow.setAttribute("aria-hidden", "true");
+
             item.appendChild(arrow);
         }
 
@@ -64,10 +122,23 @@ function renderDiscoveryJourney() {
     });
 
     journeySection.hidden = discoveryJourney.length === 0;
+
+    // Persist the journey whenever it changes.
+    try {
+        localStorage.setItem(
+            JOURNEY_STORAGE_KEY,
+            JSON.stringify(discoveryJourney)
+        );
+    } catch (error) {
+        console.warn(
+            "Could not save the discovery journey.",
+            error
+        );
+    }
 }
 
 /**
- * Record an explored movie once, preserving its first exploration order.
+ * Add a movie to the journey if it has not already been recorded.
  */
 function recordJourneyMovie(movie) {
     const id = getEntityId(movie);
@@ -81,19 +152,24 @@ function recordJourneyMovie(movie) {
         return;
     }
 
-    discoveryJourney.push({ id, name });
+    discoveryJourney.push({
+        id,
+        name
+    });
+
     renderDiscoveryJourney();
 }
 
-/**
- * Clear the current discovery history.
- */
+// Clear the journey and persist the empty state.
 if (clearJourneyButton) {
     clearJourneyButton.addEventListener("click", () => {
         discoveryJourney.length = 0;
         renderDiscoveryJourney();
     });
 }
+
+// Restore the saved journey visibly when the page first loads.
+renderDiscoveryJourney();
 
 /**
  * Add the selected-movie section and supporting styles.
@@ -789,6 +865,7 @@ function createRecommendationCard(recommendation, index, requestToken) {
     exploreButton.textContent = "Explore this movie";
 
     exploreButton.addEventListener("click", () => {
+        recordJourneyMovie(recommendation);
         loadRecommendations(recommendation);
     });
 
