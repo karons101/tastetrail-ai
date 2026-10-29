@@ -404,3 +404,137 @@ footer p {
     transform: none;
   }
 }
+
+
+
+/* Movie poster layout fixes */
+.movie-result {
+  overflow: hidden;
+  min-width: 0;
+}
+
+
+/* Search-result posters: larger artwork with consistent proportions. */
+.movie-result img {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: 200px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.movie-result:hover img {
+  transform: scale(1.02);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 480px) {
+  .movie-result img {
+    max-width: 135px;
+    height: 180px;
+  }
+}
+
+
+.movie-result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.recommendation-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.recommendation-poster {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: 240px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+.recommendation-affinity {
+  padding-top: 6px;
+  font-size: 0.8rem !important;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .recommendation-card {
+    padding: 16px;
+  }
+
+  .recommendation-poster {
+    max-width: 150px;
+    height: 210px;
+  }
+}
+
+/* =========================================
+   TasteTrail AI — Compact Recommendation Cards
+   Reduce card and poster sizes while preserving
+   the existing selected-movie/recommendations layout.
+   ========================================= */
+
+.recommendation-card {
+    padding: 14px;
+    gap: 10px;
+    min-width: 0;
+    border-radius: 12px;
+}
+
+.recommendation-card img {
+    display: block;
+    width: 100%;
+    max-width: 145px;
+    height: 195px;
+    object-fit: cover;
+    border-radius: 9px;
+    margin-bottom: 10px;
+}
+
+.recommendation-card h3 {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin: 8px 0;
+}
+
+.recommendation-card p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 5px 0;
+}
+
+.recommendation-card .explore-movie-button {
+    padding: 8px 11px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+}
+
+/* Keep recommendation cards compact on smaller screens. */
+@media (max-width: 600px) {
+    .recommendation-card {
+        padding: 11px;
+    }
+
+    .recommendation-card img {
+        max-width: 120px;
+        height: 165px;
+    }
+
+    .recommendation-card h3 {
+        font-size: 0.92rem;
+    }
+}
