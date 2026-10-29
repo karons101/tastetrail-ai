@@ -27,6 +27,74 @@ const recommendationsTitle = document.getElementById(
 
 let activeRequestToken = 0;
 
+// Discovery Journey: records movies explored during the current session.
+const discoveryJourney = [];
+const journeySection = document.getElementById("discovery-journey");
+const journeyTrail = document.getElementById("journey-trail");
+const clearJourneyButton = document.getElementById("clear-journey");
+
+/**
+ * Render the user's movie exploration history in chronological order.
+ */
+function renderDiscoveryJourney() {
+    if (!journeySection || !journeyTrail) {
+        return;
+    }
+
+    journeyTrail.replaceChildren();
+
+    discoveryJourney.forEach((movie, index) => {
+        const item = document.createElement("li");
+        item.className = "journey-item";
+
+        const title = document.createElement("span");
+        title.textContent = movie.name;
+
+        item.appendChild(title);
+
+        if (index < discoveryJourney.length - 1) {
+            const arrow = document.createElement("span");
+            arrow.className = "journey-arrow";
+            arrow.textContent = "→";
+            arrow.setAttribute("aria-hidden", "true");
+            item.appendChild(arrow);
+        }
+
+        journeyTrail.appendChild(item);
+    });
+
+    journeySection.hidden = discoveryJourney.length === 0;
+}
+
+/**
+ * Record an explored movie once, preserving its first exploration order.
+ */
+function recordJourneyMovie(movie) {
+    const id = getEntityId(movie);
+    const name = getMovieName(movie).trim();
+
+    if (!id || !name || name === "Untitled movie") {
+        return;
+    }
+
+    if (discoveryJourney.some((item) => item.id === id)) {
+        return;
+    }
+
+    discoveryJourney.push({ id, name });
+    renderDiscoveryJourney();
+}
+
+/**
+ * Clear the current discovery history.
+ */
+if (clearJourneyButton) {
+    clearJourneyButton.addEventListener("click", () => {
+        discoveryJourney.length = 0;
+        renderDiscoveryJourney();
+    });
+}
+
 /**
  * Add the selected-movie section and supporting styles.
  * This keeps the existing HTML structure usable.
@@ -491,6 +559,7 @@ function renderSearchResults(entities) {
         button.appendChild(details);
 
         button.addEventListener("click", () => {
+            recordJourneyMovie(movie);
             loadRecommendations(movie);
         });
 

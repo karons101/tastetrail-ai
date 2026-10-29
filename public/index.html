@@ -1,25 +1,53 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- =========================================================
+       DOCUMENT METADATA
+       Defines character encoding, responsive viewport behavior,
+       browser theme color, page description, and document title.
+       ========================================================= -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10111b">
+
   <meta
     name="description"
     content="Discover your next favorite movie with TasteTrail AI."
   >
+
   <title>TasteTrail AI — Discover Your Next Favorite</title>
+
+  <!-- Main application stylesheet. -->
   <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
+  <!-- =========================================================
+       SITE HEADER
+       Provides the application name and a link back to the
+       homepage. The decorative symbol is hidden from screen
+       readers because it does not add meaningful information.
+       ========================================================= -->
   <header>
     <a href="/" aria-label="TasteTrail AI home">
-      <span aria-hidden="true">✦</span> TasteTrail AI
+      <span aria-hidden="true">✦</span>
+      TasteTrail AI
     </a>
   </header>
 
   <main>
+    <!-- =======================================================
+         HERO AND MOVIE SEARCH
+         Introduces TasteTrail AI and allows users to search
+         for a movie that will serve as the starting point for
+         personalized discovery.
+
+         Frontend integration:
+         - movie-search-form: handles search submission.
+         - movie-query: contains the user's search query.
+         - search-status: announces search progress and errors.
+         - search-results: displays matching movie results.
+         ======================================================= -->
     <section aria-labelledby="hero-title">
       <p>YOUR TASTE. YOUR NEXT OBSESSION.</p>
 
@@ -33,6 +61,10 @@
         what to watch next.
       </p>
 
+      <!--
+        JavaScript intercepts this form's submission and sends
+        the query to the application's movie-search endpoint.
+      -->
       <form id="movie-search-form">
         <label for="movie-query">Search for a movie</label>
 
@@ -50,21 +82,116 @@
         </div>
       </form>
 
+      <!--
+        Announces status messages accessibly, including loading
+        states, empty results, and search errors.
+      -->
       <p id="search-status" role="status" aria-live="polite"></p>
-      <div id="search-results" aria-label="Movie search results"></div>
+
+      <!--
+        JavaScript inserts movie search results here.
+        Results can be selected to begin a discovery journey.
+      -->
+      <div
+        id="search-results"
+        aria-label="Movie search results"
+      ></div>
     </section>
 
+    <!-- =======================================================
+         DISCOVERY JOURNEY
+         Records the sequence of movies the user explores.
+
+         The section starts hidden and should become visible
+         when JavaScript adds the first movie to the journey.
+         The ordered list preserves the sequence of exploration.
+
+         Frontend integration:
+         - discovery-journey: controls section visibility.
+         - clear-journey: clears the recorded journey.
+         - journey-trail: displays explored movies in order.
+         ======================================================= -->
+    <section
+      id="discovery-journey"
+      aria-labelledby="journey-title"
+      hidden
+    >
+      <div class="journey-heading">
+        <div>
+          <p class="journey-eyebrow">YOUR EXPLORATION PATH</p>
+
+          <h2 id="journey-title">Your discovery journey</h2>
+        </div>
+
+        <!--
+          JavaScript should attach a click handler to this button
+          to clear the journey and hide the section when empty.
+        -->
+        <button
+          id="clear-journey"
+          type="button"
+          class="journey-clear-button"
+        >
+          Clear journey
+        </button>
+      </div>
+
+      <p id="journey-description">
+        Follow the movies that shape your next discovery.
+      </p>
+
+      <!--
+        Movies are added as ordered list items by JavaScript.
+        The list communicates the exploration sequence to
+        assistive technologies.
+      -->
+      <ol
+        id="journey-trail"
+        aria-label="Movies explored in order"
+      ></ol>
+    </section>
+
+    <!-- =======================================================
+         PERSONALIZED RECOMMENDATIONS
+         Displays movies associated with the currently selected
+         title using the Qloo Insights API through the backend.
+
+         JavaScript updates this section when the user selects
+         a movie or explores a recommendation.
+         ======================================================= -->
     <section aria-labelledby="recommendations-title">
       <h2 id="recommendations-title">Your next favorites</h2>
-      <p>Select a movie from your search results to discover similar titles.</p>
 
-      <div id="recommendations" aria-live="polite"></div>
+      <p>
+        Select a movie from your search results to discover
+        similar titles.
+      </p>
+
+      <!--
+        JavaScript renders recommendation cards here.
+        aria-live allows assistive technologies to announce
+        dynamically updated recommendation content.
+      -->
+      <div
+        id="recommendations"
+        aria-live="polite"
+      ></div>
     </section>
   </main>
 
+  <!-- =========================================================
+       SITE FOOTER
+       Provides a short closing message for the application.
+       ========================================================= -->
   <footer>
     <p>Made for curious minds and great movie nights.</p>
   </footer>
+
+  <!--
+    Load the frontend application after HTML parsing.
+    The defer attribute ensures the document is parsed before
+    the script executes.
+  -->
   <script src="/app.js" defer></script>
 </body>
 </html>
